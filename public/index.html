@@ -41,17 +41,18 @@ canvas{display:block;width:100%;height:100%;}
 #btn-restart{padding:16px 40px;background:#4CAF50;border:none;color:white;font-size:20px;font-weight:bold;border-radius:12px;cursor:pointer;}
 
 /* PAINEL DE CONTROLO */
-#panel{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.88);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:10px;color:white;font-size:10px;width:220px;z-index:100;max-height:95vh;overflow-y:auto;}
-#panel h2{font-size:11px;color:#4CAF50;margin-bottom:8px;text-align:center;letter-spacing:1px;}
-.section{background:rgba(255,255,255,0.05);border-radius:8px;padding:8px;margin-bottom:6px;}
-.section-title{color:#FFD700;font-size:10px;font-weight:bold;margin-bottom:5px;letter-spacing:1px;}
-.row{display:flex;align-items:center;margin:3px 0;gap:4px;}
-.row label{color:#aaa;width:50px;font-size:9px;flex-shrink:0;}
-.row input[type=range]{flex:1;height:3px;accent-color:#4CAF50;}
-.row .val{color:#fff;width:32px;text-align:right;font-size:9px;flex-shrink:0;}
-.row input[type=color]{width:30px;height:20px;border:none;border-radius:4px;cursor:pointer;padding:0;}
-.row select{flex:1;background:#222;color:white;border:1px solid #444;border-radius:4px;font-size:9px;padding:2px;}
-#coords{background:rgba(0,255,0,0.1);border:1px solid #4CAF50;border-radius:6px;padding:6px;margin-top:4px;font-size:9px;color:#4CAF50;word-break:break-all;}
+#panel{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.92);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:12px;color:white;font-size:11px;width:380px;z-index:100;max-height:96vh;overflow-y:auto;}
+#panel h2{font-size:13px;color:#4CAF50;margin-bottom:10px;text-align:center;letter-spacing:1px;}
+.section{background:rgba(255,255,255,0.05);border-radius:8px;padding:10px;margin-bottom:8px;}
+.section-title{color:#FFD700;font-size:11px;font-weight:bold;margin-bottom:6px;letter-spacing:1px;}
+.row{display:flex;align-items:center;margin:4px 0;gap:6px;}
+.row label{color:#aaa;width:65px;font-size:10px;flex-shrink:0;}
+.row input[type=range]{flex:1;height:4px;accent-color:#4CAF50;}
+.row input[type=color]{width:36px;height:24px;border:none;border-radius:4px;cursor:pointer;padding:0;}
+.row select{flex:1;background:#222;color:white;border:1px solid #444;border-radius:4px;font-size:10px;padding:3px;}
+#coords{background:rgba(0,255,0,0.1);border:1px solid #4CAF50;border-radius:6px;padding:8px;margin-top:6px;font-size:9px;color:#4CAF50;word-break:break-all;}
+.val-input{background:#1a2a1a;color:#4CAF50;border:1px solid #3a4a3a;border-radius:4px;width:65px;text-align:right;font-size:10px;padding:2px 4px;flex-shrink:0;}
+.val-input:focus{outline:1px solid #4CAF50;background:#0a1a0a;}
 </style>
 </head>
 <body>
@@ -78,79 +79,71 @@ canvas{display:block;width:100%;height:100%;}
   <!-- CÂMERA -->
   <div class="section">
     <div class="section-title">🎥 CÂMERA</div>
-    <div class="row"><label>Pos X</label><input type="range" id="cx" min="-10" max="10" step="0.5" value="0" oninput="upCam()"><span class="val" id="cx-v">0</span></div>
-    <div class="row"><label>Pos Y</label><input type="range" id="cy" min="0" max="15" step="0.5" value="2.5" oninput="upCam()"><span class="val" id="cy-v">2.5</span></div>
-    <div class="row"><label>Pos Z</label><input type="range" id="cz" min="-5" max="25" step="0.5" value="14" oninput="upCam()"><span class="val" id="cz-v">14</span></div>
-    <div class="row"><label>Look X</label><input type="range" id="lx" min="-5" max="5" step="0.5" value="0" oninput="upCam()"><span class="val" id="lx-v">0</span></div>
-    <div class="row"><label>Look Y</label><input type="range" id="ly" min="-2" max="8" step="0.5" value="1.5" oninput="upCam()"><span class="val" id="ly-v">1.5</span></div>
-    <div class="row"><label>Look Z</label><input type="range" id="lz" min="-15" max="10" step="0.5" value="-4" oninput="upCam()"><span class="val" id="lz-v">-4</span></div>
-    <div class="row"><label>FOV</label><input type="range" id="fov" min="20" max="120" step="1" value="50" oninput="upCam()"><span class="val" id="fov-v">50</span></div>
+    <div class="row"><label>Pos X</label><input type="range" id="cx" min="-10" max="10" step="0.1" value="0" oninput="upCam()"><input type="number" class="val-input" id="cx-v" value="0" step="0.1" onchange="syncFromText('cx')"></div>
+    <div class="row"><label>Pos Y</label><input type="range" id="cy" min="0" max="15" step="0.1" value="3" oninput="upCam()"><input type="number" class="val-input" id="cy-v" value="2.5" step="0.1" onchange="syncFromText('cy')"></div>
+    <div class="row"><label>Pos Z</label><input type="range" id="cz" min="-5" max="25" step="0.1" value="12" oninput="upCam()"><input type="number" class="val-input" id="cz-v" value="14" step="0.1" onchange="syncFromText('cz')"></div>
+    <div class="row"><label>Look X</label><input type="range" id="lx" min="-5" max="5" step="0.1" value="0" oninput="upCam()"><input type="number" class="val-input" id="lx-v" value="0" step="0.1" onchange="syncFromText('lx')"></div>
+    <div class="row"><label>Look Y</label><input type="range" id="ly" min="-2" max="8" step="0.1" value="2" oninput="upCam()"><input type="number" class="val-input" id="ly-v" value="1.5" step="0.1" onchange="syncFromText('ly')"></div>
+    <div class="row"><label>Look Z</label><input type="range" id="lz" min="-15" max="10" step="0.1" value="-5" oninput="upCam()"><input type="number" class="val-input" id="lz-v" value="-4" step="0.1" onchange="syncFromText('lz')"></div>
+    <div class="row"><label>FOV</label><input type="range" id="fov" min="20" max="120" step="0.5" value="60" oninput="upCam()"><input type="number" class="val-input" id="fov-v" value="50" step="0.1" onchange="syncFromText('fov')"></div>
   </div>
 
   <!-- FUNDO -->
   <div class="section">
     <div class="section-title">🏟️ FUNDO ESTÁDIO</div>
-    <div class="row"><label>Pos Y</label><input type="range" id="bgy" min="-10" max="40" step="0.5" value="15" oninput="upBg()"><span class="val" id="bgy-v">15</span></div>
-    <div class="row"><label>Pos Z</label><input type="range" id="bgz" min="-100" max="-10" step="1" value="-40" oninput="upBg()"><span class="val" id="bgz-v">-40</span></div>
-    <div class="row"><label>Largura</label><input type="range" id="bgw" min="20" max="300" step="5" value="120" oninput="upBg()"><span class="val" id="bgw-v">120</span></div>
-    <div class="row"><label>Altura</label><input type="range" id="bgh" min="10" max="150" step="5" value="60" oninput="upBg()"><span class="val" id="bgh-v">60</span></div>
+    <div class="row"><label>Pos Y</label><input type="range" id="bgy" min="-10" max="40" step="0.1" value="10" oninput="upBg()"><input type="number" class="val-input" id="bgy-v" value="15" step="0.1" onchange="syncFromText('bgy')"></div>
+    <div class="row"><label>Pos Z</label><input type="range" id="bgz" min="-100" max="-10" step="1" value="-25" oninput="upBg()"><input type="number" class="val-input" id="bgz-v" value="-40" step="0.1" onchange="syncFromText('bgz')"></div>
+    <div class="row"><label>Largura</label><input type="range" id="bgw" min="20" max="300" step="1" value="80" oninput="upBg()"><input type="number" class="val-input" id="bgw-v" value="120" step="0.1" onchange="syncFromText('bgw')"></div>
+    <div class="row"><label>Altura</label><input type="range" id="bgh" min="10" max="150" step="1" value="40" oninput="upBg()"><input type="number" class="val-input" id="bgh-v" value="60" step="0.1" onchange="syncFromText('bgh')"></div>
   </div>
 
   <!-- BALIZA -->
   <div class="section">
     <div class="section-title">🥅 BALIZA</div>
-    <div class="row"><label>Pos Z</label><input type="range" id="gz" min="-20" max="5" step="0.5" value="-8" oninput="upGoal()"><span class="val" id="gz-v">-8</span></div>
-    <div class="row"><label>Pos Y</label><input type="range" id="gy" min="-2" max="2" step="0.1" value="0" oninput="upGoal()"><span class="val" id="gy-v">0</span></div>
-    <div class="row"><label>Escala</label><input type="range" id="gs" min="0.5" max="3" step="0.1" value="1" oninput="upGoal()"><span class="val" id="gs-v">1</span></div>
+    <div class="row"><label>Pos Z</label><input type="range" id="gz" min="-20" max="5" step="0.1" value="-10" oninput="upGoal()"><input type="number" class="val-input" id="gz-v" value="-8" step="0.1" onchange="syncFromText('gz')"></div>
+    <div class="row"><label>Pos Y</label><input type="range" id="gy" min="-2" max="2" step="0.1" value="0" oninput="upGoal()"><input type="number" class="val-input" id="gy-v" value="0" step="0.1" onchange="syncFromText('gy')"></div>
+    <div class="row"><label>Escala</label><input type="range" id="gs" min="0.5" max="3" step="0.1" value="1" oninput="upGoal()"><input type="number" class="val-input" id="gs-v" value="1" step="0.1" onchange="syncFromText('gs')"></div>
   </div>
 
   <!-- GOLEIRO -->
   <div class="section">
     <div class="section-title">🧤 GOLEIRO</div>
-    <div class="row"><label>Pos X</label><input type="range" id="gkx" min="-5" max="5" step="0.5" value="0" oninput="upGK()"><span class="val" id="gkx-v">0</span></div>
-    <div class="row"><label>Pos Y</label><input type="range" id="gky" min="-3" max="5" step="0.1" value="0" oninput="upGK()"><span class="val" id="gky-v">0</span></div>
-    <div class="row"><label>Pos Z</label><input type="range" id="gkz" min="-15" max="5" step="0.5" value="-8" oninput="upGK()"><span class="val" id="gkz-v">-8</span></div>
-    <div class="row"><label>Escala</label><input type="range" id="gksc" min="0.001" max="0.03" step="0.001" value="0.01" oninput="upGK()"><span class="val" id="gksc-v">0.01</span></div>
-    <div class="row"><label>Rot Y</label><input type="range" id="gkry" min="-3.14" max="3.14" step="0.1" value="0" oninput="upGK()"><span class="val" id="gkry-v">0</span></div>
+    <div class="row"><label>Pos X</label><input type="range" id="gkx" min="-5" max="5" step="0.1" value="0" oninput="upGK()"><input type="number" class="val-input" id="gkx-v" value="0" step="0.1" onchange="syncFromText('gkx')"></div>
+    <div class="row"><label>Pos Y</label><input type="range" id="gky" min="-3" max="5" step="0.1" value="0" oninput="upGK()"><input type="number" class="val-input" id="gky-v" value="0" step="0.1" onchange="syncFromText('gky')"></div>
+    <div class="row"><label>Pos Z</label><input type="range" id="gkz" min="-15" max="5" step="0.1" value="-10" oninput="upGK()"><input type="number" class="val-input" id="gkz-v" value="-8" step="0.1" onchange="syncFromText('gkz')"></div>
+    <div class="row"><label>Escala</label><input type="range" id="gksc" min="0.001" max="0.03" step="0.001" value="0.012" oninput="upGK()"><input type="number" class="val-input" id="gksc-v" value="0.01" step="0.1" onchange="syncFromText('gksc')"></div>
+    <div class="row"><label>Rot Y</label><input type="range" id="gkry" min="-3.14" max="3.14" step="0.1" value="0" oninput="upGK()"><input type="number" class="val-input" id="gkry-v" value="0" step="0.1" onchange="syncFromText('gkry')"></div>
     <div class="row"><label>Uniforme</label><input type="color" id="gk-shirt" value="#ff2200" oninput="upColors()"></div>
     <div class="row"><label>Calções</label><input type="color" id="gk-shorts" value="#111111" oninput="upColors()"></div>
     <div class="row"><label>Pele</label>
-      <select id="gk-skin" onchange="upColors()">
-        <option value="#f5c5a3">Clara</option>
-        <option value="#d4956a">Média</option>
-        <option value="#8d5524">Escura</option>
-        <option value="#c68642">Morena</option>
-      </select>
+      <input type="range" id="gk-skin-range" min="0" max="100" step="1" value="20" oninput="upSkin('gk')" style="flex:1;height:6px;border-radius:3px;background:linear-gradient(to right,#fce4c8,#e8b88a,#c68642,#8d5524,#4a2508);appearance:none;-webkit-appearance:none;">
+      <span style="font-size:9px;color:#aaa;flex-shrink:0;">Claro↔Escuro</span><div id="gk-skin-preview" style="width:28px;height:28px;border-radius:50%;border:2px solid #444;flex-shrink:0;background:#fce4c8;"></div>
     </div>
   </div>
 
   <!-- BATEDOR -->
   <div class="section">
     <div class="section-title">🦵 BATEDOR</div>
-    <div class="row"><label>Pos X</label><input type="range" id="kx" min="-5" max="5" step="0.5" value="0" oninput="upKick()"><span class="val" id="kx-v">0</span></div>
-    <div class="row"><label>Pos Y</label><input type="range" id="ky" min="-3" max="8" step="0.1" value="0" oninput="upKick()"><span class="val" id="ky-v">0</span></div>
-    <div class="row"><label>Pos Z</label><input type="range" id="kz" min="0" max="15" step="0.5" value="5" oninput="upKick()"><span class="val" id="kz-v">5</span></div>
-    <div class="row"><label>Escala</label><input type="range" id="ksc" min="0.001" max="0.03" step="0.001" value="0.01" oninput="upKick()"><span class="val" id="ksc-v">0.01</span></div>
-    <div class="row"><label>Rot Y</label><input type="range" id="kry" min="-3.14" max="3.14" step="0.1" value="3.14" oninput="upKick()"><span class="val" id="kry-v">3.14</span></div>
+    <div class="row"><label>Pos X</label><input type="range" id="kx" min="-5" max="5" step="0.1" value="0" oninput="upKick()"><input type="number" class="val-input" id="kx-v" value="0" step="0.1" onchange="syncFromText('kx')"></div>
+    <div class="row"><label>Pos Y</label><input type="range" id="ky" min="-3" max="8" step="0.1" value="0" oninput="upKick()"><input type="number" class="val-input" id="ky-v" value="0" step="0.1" onchange="syncFromText('ky')"></div>
+    <div class="row"><label>Pos Z</label><input type="range" id="kz" min="0" max="15" step="0.1" value="4" oninput="upKick()"><input type="number" class="val-input" id="kz-v" value="5" step="0.1" onchange="syncFromText('kz')"></div>
+    <div class="row"><label>Escala</label><input type="range" id="ksc" min="0.001" max="0.03" step="0.001" value="0.012" oninput="upKick()"><input type="number" class="val-input" id="ksc-v" value="0.01" step="0.1" onchange="syncFromText('ksc')"></div>
+    <div class="row"><label>Rot Y</label><input type="range" id="kry" min="-3.14" max="3.14" step="0.1" value="3.14" oninput="upKick()"><input type="number" class="val-input" id="kry-v" value="3.14" step="0.1" onchange="syncFromText('kry')"></div>
     <div class="row"><label>Uniforme</label><input type="color" id="k-shirt" value="#ff2200" oninput="upColors()"></div>
     <div class="row"><label>Calções</label><input type="color" id="k-shorts" value="#111111" oninput="upColors()"></div>
     <div class="row"><label>Pele</label>
-      <select id="k-skin" onchange="upColors()">
-        <option value="#f5c5a3">Clara</option>
-        <option value="#d4956a">Média</option>
-        <option value="#8d5524">Escura</option>
-        <option value="#c68642">Morena</option>
-      </select>
+      <input type="range" id="k-skin-range" min="0" max="100" step="1" value="20" oninput="upSkin('k')" style="flex:1;height:6px;border-radius:3px;background:linear-gradient(to right,#fce4c8,#e8b88a,#c68642,#8d5524,#4a2508);appearance:none;-webkit-appearance:none;">
+      <span style="font-size:9px;color:#aaa;flex-shrink:0;">Claro↔Escuro</span><div id="k-skin-preview" style="width:28px;height:28px;border-radius:50%;border:2px solid #444;flex-shrink:0;background:#fce4c8;"></div>
     </div>
   </div>
 
   <!-- BOLA -->
   <div class="section">
     <div class="section-title">⚽ BOLA</div>
-    <div class="row"><label>Pos X</label><input type="range" id="bx" min="-5" max="5" step="0.5" value="0" oninput="upBall()"><span class="val" id="bx-v">0</span></div>
-    <div class="row"><label>Pos Y</label><input type="range" id="ball-y" min="0" max="3" step="0.1" value="0.22" oninput="upBall()"><span class="val" id="ball-y-v">0.22</span></div>
-    <div class="row"><label>Pos Z</label><input type="range" id="ball-z" min="-5" max="15" step="0.5" value="2" oninput="upBall()"><span class="val" id="ball-z-v">2</span></div>
-    <div class="row"><label>Tamanho</label><input type="range" id="bsc" min="0.1" max="2" step="0.05" value="0.22" oninput="upBall()"><span class="val" id="bsc-v">0.22</span></div>
+    <div class="row"><label>Pos X</label><input type="range" id="bx" min="-5" max="5" step="0.1" value="0" oninput="upBall()"><input type="number" class="val-input" id="bx-v" value="0" step="0.1" onchange="syncFromText('bx')"></div>
+    <div class="row"><label>Pos Y</label><input type="range" id="ball-y" min="0" max="3" step="0.1" value="0.22" oninput="upBall()"><input type="number" class="val-input" id="ball-y-v" value="0.22" step="0.1" onchange="syncFromText('ball-y')"></div>
+    <div class="row"><label>Pos Z</label><input type="range" id="ball-z" min="-5" max="15" step="0.1" value="3" oninput="upBall()"><input type="number" class="val-input" id="ball-z-v" value="2" step="0.1" onchange="syncFromText('ball-z')"></div>
+    <div class="row"><label>Tamanho</label><input type="range" id="bsc" min="0.1" max="2" step="0.05" value="0.22" oninput="upBall()"><input type="number" class="val-input" id="bsc-v" value="0.22" step="0.1" onchange="syncFromText('bsc')"></div>
   </div>
 
   <!-- COORDENADAS -->
@@ -317,10 +310,22 @@ function initGame(){
   gkModel.traverse(n=>{
     if(n.isMesh){
       n.castShadow=true;n.receiveShadow=true;
-      const name=(n.material&&n.material.name)||'';
-      if(name.includes('Skin')||name.includes('skin')){skinMats.gk.push(n.material);}
-      if(name.includes('shirt')||name.includes('Shirt')||name.includes('T_shirt')){shirtMats.gk.push(n.material);}
-      if(name.includes('Short')||name.includes('short')){shortsMats.gk.push(n.material);}
+      // Clonar material para poder mudar cor independentemente
+      if(Array.isArray(n.material)){
+        n.material=n.material.map(m=>m.clone());
+      } else {
+        n.material=n.material.clone();
+      }
+      const mats=Array.isArray(n.material)?n.material:[n.material];
+      mats.forEach(m=>{
+        const name=(m.name||'');
+        const skinNames=['Std_Skin_Head','Std_Skin_Body','Std_Skin_Arm','Std_Skin_Leg','Std_Nails'];
+        const shirtNames=['T_shirt','T_shirt.001'];
+        const shortsNames=['Classic_Shorts','Classic_Shorts.001'];
+        if(skinNames.some(s=>name.includes(s))){skinMats.gk.push(m);}
+        else if(shirtNames.some(s=>name.includes(s))){shirtMats.gk.push(m);}
+        else if(shortsNames.some(s=>name.includes(s))){shortsMats.gk.push(m);}
+      });
     }
   });
   scene.add(gkModel);
@@ -338,10 +343,21 @@ function initGame(){
   kickModel.traverse(n=>{
     if(n.isMesh){
       n.castShadow=true;n.receiveShadow=true;
-      const name=(n.material&&n.material.name)||'';
-      if(name.includes('Skin')||name.includes('skin')){skinMats.kick.push(n.material);}
-      if(name.includes('shirt')||name.includes('Shirt')||name.includes('T_shirt')){shirtMats.kick.push(n.material);}
-      if(name.includes('Short')||name.includes('short')){shortsMats.kick.push(n.material);}
+      if(Array.isArray(n.material)){
+        n.material=n.material.map(m=>m.clone());
+      } else {
+        n.material=n.material.clone();
+      }
+      const mats=Array.isArray(n.material)?n.material:[n.material];
+      mats.forEach(m=>{
+        const name=(m.name||'');
+        const skinNames=['Std_Skin_Head','Std_Skin_Body','Std_Skin_Arm','Std_Skin_Leg','Std_Nails'];
+        const shirtNames=['T_shirt','T_shirt.001'];
+        const shortsNames=['Classic_Shorts','Classic_Shorts.001'];
+        if(skinNames.some(s=>name.includes(s))){skinMats.kick.push(m);}
+        else if(shirtNames.some(s=>name.includes(s))){shirtMats.kick.push(m);}
+        else if(shortsNames.some(s=>name.includes(s))){shortsMats.kick.push(m);}
+      });
     }
   });
   scene.add(kickModel);
@@ -430,14 +446,22 @@ window.shoot=function(dir){
 
   setTimeout(()=>{
     playGK(gkAnim,false);
-    const dur=0.28;let el=0;
+    const dur=0.38;let el=0;
+    const peakY=Math.max(endPos.y,startPos.y)+1.5; // arco da bola
     const ab=(dt)=>{
       el+=dt;const p=Math.min(el/dur,1);
       const e=p<0.5?2*p*p:-1+(4-2*p)*p;
-      ballModel.position.lerpVectors(startPos,endPos,e);
-      bsh.position.x=ballModel.position.x;
-      ballModel.rotation.x-=dt*30;
-      ballModel.rotation.z-=dt*10;
+      // Posição X e Z interpolada
+      const bx2=startPos.x+(endPos.x-startPos.x)*e;
+      const bz2=startPos.z+(endPos.z-startPos.z)*e;
+      // Y com arco parabólico + gravidade
+      const arcY=startPos.y+(endPos.y-startPos.y)*p + Math.sin(p*Math.PI)*peakY*(1-p*0.3);
+      ballModel.position.set(bx2,Math.max(arcY,0.22),bz2);
+      bsh.position.x=bx2;
+      bsh.position.z=bz2;
+      // Bola roda mais rápido no inicio
+      ballModel.rotation.x-=dt*40*(1-p*0.5);
+      ballModel.rotation.z-=dt*15;
       if(p<1)requestAnimationFrame(()=>ab(clock.getDelta()));
       else{
         if(saved){saves++;document.getElementById('sv').textContent=saves;showMsg('DEFENDIDO! 🧤','#ff4444');}
@@ -544,20 +568,50 @@ window.upBall=function(){
   }
 };
 
+// Paleta de tons de pele - branco rosado até negro
+function skinTone(t){
+  // t: 0-100
+  const stops=[
+    [0,   [252,228,200]], // muito clara
+    [20,  [240,194,150]], // clara
+    [35,  [220,165,110]], // médio clara
+    [50,  [198,134,66]],  // morena
+    [65,  [160,100,40]],  // morena escura
+    [80,  [100,60,20]],   // escura
+    [100, [40,20,5]],     // muito escura/negra
+  ];
+  let i=0;
+  while(i<stops.length-1&&stops[i+1][0]<=t)i++;
+  if(i>=stops.length-1)return stops[stops.length-1][1];
+  const a=stops[i],b=stops[i+1];
+  const f=(t-a[0])/(b[0]-a[0]);
+  return a[1].map((v,j)=>Math.round(v+(b[1][j]-v)*f));
+}
+
+function skinHex(t){
+  const [r,g,b]=skinTone(t);
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+window.upSkin=function(who){
+  const t=parseFloat(document.getElementById(who+'-skin-range').value);
+  const hex=skinHex(t);
+  document.getElementById(who+'-skin-preview').style.background=hex;
+  const col=new THREE.Color(hex);
+  const mats=who==='gk'?skinMats.gk:skinMats.kick;
+  mats.forEach(m=>{m.map=null;m.color.set(col);m.needsUpdate=true;});
+};
+
 window.upColors=function(){
   const hexToColor=hex=>new THREE.Color(hex);
   const gkShirt=hexToColor(document.getElementById('gk-shirt').value);
   const gkShorts=hexToColor(document.getElementById('gk-shorts').value);
-  const gkSkin=hexToColor(document.getElementById('gk-skin').value);
   const kShirt=hexToColor(document.getElementById('k-shirt').value);
   const kShorts=hexToColor(document.getElementById('k-shorts').value);
-  const kSkin=hexToColor(document.getElementById('k-skin').value);
-  shirtMats.gk.forEach(m=>m.color.set(gkShirt));
-  shortsMats.gk.forEach(m=>m.color.set(gkShorts));
-  skinMats.gk.forEach(m=>m.color.set(gkSkin));
-  shirtMats.kick.forEach(m=>m.color.set(kShirt));
-  shortsMats.kick.forEach(m=>m.color.set(kShorts));
-  skinMats.kick.forEach(m=>m.color.set(kSkin));
+  shirtMats.gk.forEach(m=>{m.map=null;m.color.set(gkShirt);m.needsUpdate=true;});
+  shortsMats.gk.forEach(m=>{m.map=null;m.color.set(gkShorts);m.needsUpdate=true;});
+  shirtMats.kick.forEach(m=>{m.map=null;m.color.set(kShirt);m.needsUpdate=true;});
+  shortsMats.kick.forEach(m=>{m.map=null;m.color.set(kShorts);m.needsUpdate=true;});
 };
 
 window.copyCoords=function(){
@@ -573,6 +627,21 @@ window.copyCoords=function(){
   navigator.clipboard.writeText(txt).then(()=>{
     document.getElementById('coords').textContent='✅ Copiado!\n'+txt;
   });
+};
+
+
+window.syncFromText=function(id){
+  const input=document.getElementById(id+'-v');
+  const slider=document.getElementById(id);
+  if(!input||!slider)return;
+  slider.value=input.value;
+  // Trigger o update correto
+  if(['cx','cy','cz','lx','ly','lz','fov'].includes(id))upCam();
+  else if(['bgy','bgz','bgw','bgh'].includes(id))upBg();
+  else if(['gz','gy','gs'].includes(id))upGoal();
+  else if(['gkx','gky','gkz','gksc','gkry'].includes(id))upGK();
+  else if(['kx','ky','kz','ksc','kry'].includes(id))upKick();
+  else if(['bx','ball-y','ball-z','bsc'].includes(id))upBall();
 };
 
 function animate(){
