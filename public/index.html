@@ -39,6 +39,13 @@ canvas{display:block;width:100%;height:100%;}
 #gameover h1{font-size:52px;font-weight:900;}
 #fs{font-size:28px;color:#FFD700;}
 #btn-restart{padding:16px 40px;background:#4CAF50;border:none;color:white;font-size:20px;font-weight:bold;border-radius:12px;cursor:pointer;}
+
+#cam-panel{position:absolute;top:70px;right:10px;background:rgba(0,0,0,0.85);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:12px;color:white;font-size:11px;width:190px;z-index:100;}
+#cam-panel h3{font-size:12px;margin-bottom:8px;color:#4CAF50;text-align:center;}
+.cam-row{display:flex;align-items:center;justify-content:space-between;margin:3px 0;}
+.cam-row label{color:#aaa;width:55px;font-size:10px;}
+.cam-row input[type=range]{width:80px;}
+.cam-val{color:#fff;width:35px;text-align:right;font-size:10px;}
 </style>
 </head>
 <body>
@@ -226,7 +233,7 @@ function initGame(){
   // Kicker — de costas para câmera (rotation.y = Math.PI = vira para a baliza)
   kickModel=gltfs['penalty_kick'].scene;
   kickModel.scale.setScalar(0.01);
-  kickModel.position.set(0,3.77,5);
+  kickModel.position.set(0,0,5);
   kickModel.rotation.y=Math.PI;
   kickModel.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
   scene.add(kickModel);
@@ -349,7 +356,7 @@ window.resetGame=function(){
   document.getElementById('sh').textContent='5';
   document.getElementById('gameover').style.display='none';
   if(ballModel)ballModel.position.set(0,0.22,2);
-  if(kickModel)kickModel.position.set(0,3.77,5);
+  if(kickModel)kickModel.position.set(0,0,5);
   bsh.position.set(0,0.01,5.5);
   playGK('idle',true);
 };
