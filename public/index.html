@@ -150,7 +150,7 @@ canvas{display:block;width:100%;height:100%;}
     <div class="row"><label>Pos X</label><input type="range" id="bx" min="-5" max="5" step="0.1" value="0" oninput="upBall()"><input type="number" class="val-input" id="bx-v" value="0" step="0.1" onchange="syncFromText('bx')"></div>
     <div class="row"><label>Pos Y</label><input type="range" id="ball-y" min="0" max="3" step="0.1" value="0.1" oninput="upBall()"><input type="number" class="val-input" id="ball-y-v" value="0.1" step="0.1" onchange="syncFromText('ball-y')"></div>
     <div class="row"><label>Pos Z</label><input type="range" id="ball-z" min="-5" max="15" step="0.1" value="2" oninput="upBall()"><input type="number" class="val-input" id="ball-z-v" value="2" step="0.1" onchange="syncFromText('ball-z')"></div>
-    <div class="row"><label>Tamanho</label><input type="range" id="bsc" min="0.1" max="2" step="0.05" value="0.1" oninput="upBall()"><input type="number" class="val-input" id="bsc-v" value="0.1" step="0.1" onchange="syncFromText('bsc')"></div>
+    <div class="row"><label>Tamanho</label><input type="range" id="bsc" min="0.05" max="1" step="0.05" value="0.22" oninput="upBall()"><input type="number" class="val-input" id="bsc-v" value="0.1" step="0.1" onchange="syncFromText('bsc')"></div>
     <div class="row"><label>⏱ Delay</label><input type="range" id="ball-delay" min="0" max="1000" step="50" value="400" oninput="document.getElementById('ball-delay-v').value=this.value"><input type="number" class="val-input" id="ball-delay-v" value="400" step="50" onchange="document.getElementById('ball-delay').value=this.value"></div>
     <div style="color:#888;font-size:9px;margin-top:2px;">ms após o chute (0=imediato, 400=padrão)</div>
     <div class="row"><label>🎯 Vel. Mira</label><input type="range" id="aim-speed" min="0.5" max="5" step="0.1" value="2.5" oninput="aimSpeedX=parseFloat(this.value);aimSpeedY=parseFloat(this.value)*0.7;document.getElementById('aim-speed-v').value=this.value"><input type="number" class="val-input" id="aim-speed-v" value="2.5" step="0.1" onchange="aimSpeedX=parseFloat(this.value);aimSpeedY=parseFloat(this.value)*0.7;document.getElementById('aim-speed').value=this.value"></div>
@@ -295,9 +295,8 @@ addNet(7.32,1.5,22,5,0,2.44,-0.75,Math.PI/2,0,goalGroup);
 addNet(1.5,2.44,5,8,-3.66,1.22,-0.75,0,Math.PI/2,goalGroup);
 addNet(1.5,2.44,5,8,3.66,1.22,-0.75,0,Math.PI/2,goalGroup);
 
-// Ball shadow
-const bsh=new THREE.Mesh(new THREE.CircleGeometry(0.22,16),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.3}));
-bsh.rotation.x=-Math.PI/2;bsh.position.set(0,0.005,2);scene.add(bsh);
+// Sombra via shadowMap (sem círculo manual)
+const bsh={position:{x:0,y:0,z:0,set:function(){}}};// dummy
 
 // Load models
 const dracoLoader=new DRACOLoader();
@@ -408,12 +407,15 @@ function initGame(){
     const bbox=new THREE.Box3().setFromObject(ballModel);
     const size=new THREE.Vector3();
     bbox.getSize(size);
-    const s=0.44/Math.max(size.x,size.y,size.z);
+    const maxDim=Math.max(size.x,size.y,size.z);
+    const targetR=0.22; // raio desejado em metros
+    const s=targetR*2/maxDim;
     ballModel.scale.setScalar(s);
-    ballModel.position.set(0,0.1,2);
+    ballModel.position.set(0,0.22,2);
     ballModel.traverse(n=>{if(n.isMesh){n.castShadow=true;}});
     scene.add(ballModel);
     window._ballScale=s;
+    window._ballBaseR=targetR;
   } else {
     // Fallback canvas ball
     const bc=document.createElement('canvas');bc.width=256;bc.height=256;
@@ -437,7 +439,7 @@ function initGame(){
   window.goalGroup=goalGroup;
   window.bgMesh=bgMesh;
   window.camera=camera;
-  window.bsh=bsh;
+  
   // Iniciar mira automaticamente
   setTimeout(startAim, 500);
 }
@@ -505,7 +507,7 @@ window.shoot=function(dir){
           const by=parseFloat(document.getElementById('ball-y').value)||0.22;
           const bxv=parseFloat(document.getElementById('bx').value)||0;
           ballModel.position.set(bxv,by,bz);
-          bsh.position.set(bxv,0.005,bz);
+          
           playGK('idle',true);
           if(kickAnims['kick']){kickAnims['kick'].paused=true;kickAnims['kick'].time=0.3;}
           if(shots<=0)endGame();else state='idle';
@@ -536,7 +538,7 @@ window.resetGame=function(){
   const bz=parseFloat(document.getElementById('ball-z').value)||2;
   const by=parseFloat(document.getElementById('ball-y').value)||0.22;
   if(ballModel)ballModel.position.set(0,by,bz);
-  bsh.position.set(0,0.005,bz);
+  
   playGK('idle',true);
   if(kickAnims['kick']){kickAnims['kick'].paused=true;kickAnims['kick'].time=0.3;}
   setTimeout(startAim,500);
@@ -596,12 +598,12 @@ window.upBall=function(){
   ['bx','ball-y','ball-z','bsc'].forEach(id=>sv(id,v(id)));
   if(!ballModel)return;
   ballModel.position.set(v('bx'),v('ball-y'),v('ball-z'));
-  bsh.position.set(v('bx'),0.005,v('ball-z'));
-  const newR=v('bsc');
-  if(window._ballScale){
-    ballModel.scale.setScalar(newR/0.22*window._ballScale);
+  
+  const newR=Math.max(0.05,v('bsc'));
+  if(window._ballScale && window._ballBaseR){
+    ballModel.scale.setScalar(window._ballScale*(newR/window._ballBaseR));
   } else {
-    ballModel.scale.setScalar(newR/0.22);
+    ballModel.scale.setScalar(newR);
   }
 };
 
