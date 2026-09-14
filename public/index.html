@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚽ Penalty Shootout 3D</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;}
+canvas{display:block;width:100%;height:100%;}
+#hud{position:absolute;top:0;left:0;right:0;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;}
+#score-box{background:rgba(0,0,0,0.75);border:2px solid rgba(255,255,255,0.3);border-radius:12px;padding:8px 24px;color:white;font-size:26px;font-weight:bold;letter-spacing:3px;}
+.hud-side{background:rgba(0,0,0,0.75);border:2px solid rgba(255,255,255,0.2);border-radius:10px;padding:8px 14px;color:#aaa;font-size:12px;text-align:center;min-width:80px;}
+.hud-side span{display:block;color:white;font-size:20px;font-weight:bold;}
+#msg{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);color:white;font-size:56px;font-weight:900;text-shadow:0 0 40px rgba(255,200,0,0.9),0 4px 8px rgba(0,0,0,0.8);opacity:0;transition:opacity 0.3s;pointer-events:none;text-align:center;white-space:nowrap;}
+#controller{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:50px;align-items:center;}
+.dpad{position:relative;width:108px;height:108px;}
+.dp{position:absolute;background:rgba(20,20,20,0.92);border:1.5px solid rgba(255,255,255,0.18);color:white;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all 0.1s;user-select:none;border-radius:6px;}
+.dp:active{background:rgba(100,100,100,0.95);transform:scale(0.9);}
+.dp-u{top:0;left:34px;width:40px;height:40px;border-radius:6px 6px 0 0;}
+.dp-d{bottom:0;left:34px;width:40px;height:40px;border-radius:0 0 6px 6px;}
+.dp-l{top:34px;left:0;width:40px;height:40px;border-radius:6px 0 0 6px;}
+.dp-r{top:34px;right:0;width:40px;height:40px;border-radius:0 6px 6px 0;}
+.dp-c{top:34px;left:34px;width:40px;height:40px;background:rgba(10,10,10,0.9);border:1.5px solid rgba(255,255,255,0.08);position:absolute;}
+.fbtns{position:relative;width:108px;height:108px;}
+.fb{position:absolute;width:38px;height:38px;border-radius:50%;border:none;color:white;font-weight:bold;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.1s;user-select:none;box-shadow:0 4px 10px rgba(0,0,0,0.7);}
+.fb:active{transform:scale(0.87);}
+.fb-y{top:0;left:35px;background:#c8a200;}
+.fb-x{top:35px;left:0;background:#1a3fa0;}
+.fb-b{top:35px;right:0;background:#a01a1a;}
+.fb-a{bottom:0;left:35px;background:#1a7a1a;}
+.ctrl-lbl{color:rgba(255,255,255,0.4);font-size:10px;text-align:center;margin-top:5px;letter-spacing:1px;}
+#loading{position:absolute;inset:0;background:#0a1a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;gap:16px;}
+#loading h1{font-size:36px;}
+#pb{width:300px;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;}
+#pf{height:100%;background:linear-gradient(90deg,#4CAF50,#8BC34A);border-radius:3px;transition:width 0.3s;width:0%;}
+#lt{color:#888;font-size:13px;}
+#gameover{position:absolute;inset:0;background:rgba(0,0,0,0.88);display:none;flex-direction:column;align-items:center;justify-content:center;color:white;gap:20px;}
+#gameover h1{font-size:52px;font-weight:900;}
+#fs{font-size:28px;color:#FFD700;}
+#btn-restart{padding:16px 40px;background:#4CAF50;border:none;color:white;font-size:20px;font-weight:bold;border-radius:12px;cursor:pointer;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="loading">
+  <h1>⚽ Penalty Shootout</h1>
+  <div id="pb"><div id="pf"></div></div>
+  <div id="lt">A carregar...</div>
+</div>
+<div id="hud">
+  <div class="hud-side">REMATES<span id="sh">5</span></div>
+  <div id="score-box"><span id="sp">0</span> — <span id="sk">0</span></div>
+  <div class="hud-side">DEFESAS<span id="sv">0</span></div>
+</div>
+<div id="msg"></div>
+<div id="controller">
+  <div>
+    <div class="dpad">
+      <div class="dp dp-u" onclick="shoot('top')">▲</div>
+      <div class="dp dp-l" onclick="shoot('left')">◄</div>
+      <div class="dp-c"></div>
+      <div class="dp dp-r" onclick="shoot('right')">►</div>
+      <div class="dp dp-d" onclick="shoot('low')">▼</div>
+    </div>
+    <div class="ctrl-lbl">DIRECIONAR</div>
+  </div>
+  <div>
+    <div class="fbtns">
+      <div class="fb fb-y" onclick="shoot('top')">Y</div>
+      <div class="fb fb-x" onclick="shoot('left')">X</div>
+      <div class="fb fb-b" onclick="shoot('right')">B</div>
+      <div class="fb fb-a" onclick="shoot('low')">A</div>
+    </div>
+    <div class="ctrl-lbl">CHUTAR</div>
+  </div>
+</div>
+<div id="cam-panel">
+  <h3>🎥 CÂMERA</h3>
+  <div class="cam-row"><label>Pos X</label><input type="range" id="cx" min="-10" max="10" step="0.5" value="0"><span class="cam-val" id="cx-v">0</span></div>
+  <div class="cam-row"><label>Pos Y</label><input type="range" id="cy" min="0" max="15" step="0.5" value="2.5"><span class="cam-val" id="cy-v">2.5</span></div>
+  <div class="cam-row"><label>Pos Z</label><input type="range" id="cz" min="-5" max="25" step="0.5" value="14"><span class="cam-val" id="cz-v">14</span></div>
+  <div class="cam-row"><label>Look X</label><input type="range" id="lx" min="-5" max="5" step="0.5" value="0"><span class="cam-val" id="lx-v">0</span></div>
+  <div class="cam-row"><label>Look Y</label><input type="range" id="ly" min="-2" max="8" step="0.5" value="1.5"><span class="cam-val" id="ly-v">1.5</span></div>
+  <div class="cam-row"><label>Look Z</label><input type="range" id="lz" min="-15" max="10" step="0.5" value="-4"><span class="cam-val" id="lz-v">-4</span></div>
+  <div class="cam-row"><label>FOV</label><input type="range" id="fov" min="20" max="100" step="1" value="50"><span class="cam-val" id="fov-v">50</span></div>
+  <div style="margin-top:8px;color:#888;font-size:10px;text-align:center">Ajusta e faz print dos valores!</div>
+</div>
+<div id="gameover">
+  <h1 id="got">FIM DO JOGO</h1>
+  <div id="fs"></div>
+  <button id="btn-restart" onclick="resetGame()">JOGAR NOVAMENTE</button>
+</div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
+
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.0;
+
+const scene=new THREE.Scene();
+
+// Camera: afastada para ver batedor inteiro
+const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,300);
+camera.position.set(0,2.5,14);
+camera.lookAt(0,1.5,-4);
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+// Stadium background
+const texLoader=new THREE.TextureLoader();
+texLoader.load('/stadium.png',(tex)=>{
+  scene.background=tex;
+},(undefined),(err)=>{
+  // fallback gradient sky
+  scene.background=new THREE.Color(0x1a3a1a);
+});
+
+// Lighting
+scene.add(new THREE.AmbientLight(0xaabbcc,1.2));
+const sun=new THREE.DirectionalLight(0xfff5e0,2.5);
+sun.position.set(5,20,8);sun.castShadow=true;
+sun.shadow.mapSize.width=2048;sun.shadow.mapSize.height=2048;
+sun.shadow.camera.near=0.5;sun.shadow.camera.far=80;
+sun.shadow.camera.left=-20;sun.shadow.camera.right=20;
+sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;
+sun.shadow.bias=-0.001;
+scene.add(sun);
+[[-10,18,5],[10,18,5]].forEach(([x,y,z])=>{
+  const l=new THREE.SpotLight(0xfff0cc,2,60,Math.PI/5,0.4);
+  l.position.set(x,y,z);scene.add(l);
+  l.target.position.set(0,0,2);scene.add(l.target);
+});
+
+// Chao simples (grama da imagem de fundo)
+const ground=new THREE.Mesh(
+  new THREE.PlaneGeometry(60,80),
+  new THREE.MeshLambertMaterial({color:0x2a6e2a,transparent:true,opacity:0.0})
+);
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+
+// Penalty spot
+const lm=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.9});
+const ps2=new THREE.Mesh(new THREE.CircleGeometry(0.12,16),lm);
+ps2.rotation.x=-Math.PI/2;ps2.position.set(0,0.01,5.5);scene.add(ps2);
+// Goal line
+const gl2=new THREE.Mesh(new THREE.PlaneGeometry(7.32,0.08),lm);
+gl2.rotation.x=-Math.PI/2;gl2.position.set(0,0.01,0);scene.add(gl2);
+
+// Goal posts
+const pm=new THREE.MeshStandardMaterial({color:0xffffff,metalness:0.9,roughness:0.1});
+const cyl=(x,y,z,rx,rz,l)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,l,16),pm);m.position.set(x,y,z);if(rx)m.rotation.x=rx;if(rz)m.rotation.z=rz;m.castShadow=true;scene.add(m);};
+cyl(-3.66,1.22,-8,0,0,2.44);cyl(3.66,1.22,-8,0,0,2.44);
+cyl(0,2.44,-8,0,Math.PI/2,7.32);
+cyl(-3.66,1.22,-9.5,0,0,2.44);cyl(3.66,1.22,-9.5,0,0,2.44);
+cyl(0,0,-9.5,0,Math.PI/2,7.32);
+cyl(-3.66,2.44,-8.75,Math.PI/2,0,1.5);cyl(3.66,2.44,-8.75,Math.PI/2,0,1.5);
+cyl(0,1.22,-9.5,Math.PI/2,0,2.44);
+
+// Net
+const nm=new THREE.MeshBasicMaterial({color:0xffffff,wireframe:true,opacity:0.25,transparent:true,side:THREE.DoubleSide});
+const addNet=(w,h,sw,sh,px,py,pz,rx,ry)=>{
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h,sw,sh),nm);
+  m.position.set(px,py,pz);
+  if(rx)m.rotation.x=rx;
+  if(ry)m.rotation.y=ry;
+  scene.add(m);
+};
+addNet(7.32,2.44,22,8,0,1.22,-9.5,0,0);
+addNet(7.32,1.5,22,5,0,2.44,-8.75,Math.PI/2,0);
+addNet(1.5,2.44,5,8,-3.66,1.22,-8.75,0,Math.PI/2);
+addNet(1.5,2.44,5,8,3.66,1.22,-8.75,0,Math.PI/2);
+
+// Ball shadow
+const bsh=new THREE.Mesh(new THREE.CircleGeometry(0.22,16),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.3}));
+bsh.rotation.x=-Math.PI/2;bsh.position.set(0,0.01,2);scene.add(bsh);
+
+// Load models
+const dracoLoader=new DRACOLoader();
+dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/libs/draco/');
+const loader=new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+let loaded=0;const gltfs={};
+const models=['gk-idle.glb','gk-dive-left.glb','gk-dive-right.glb','penalty-kick.glb'];
+
+function upd(n){
+  loaded++;
+  document.getElementById('pf').style.width=(loaded/models.length*100)+'%';
+  document.getElementById('lt').textContent='Carregado: '+n;
+  if(loaded>=models.length)initGame();
+}
+models.forEach(f=>{
+  const key=f.replace('.glb','').replace(/-/g,'_');
+  loader.load('/'+f,g=>{gltfs[key]=g;upd(f);},undefined,()=>upd(f));
+});
+
+let state='idle',shots=5,goals=0,saves=0;
+let gkMixer=null,kickMixer=null,gkModel=null,kickModel=null,ballModel=null;
+let gkAnims={},kickAnims={},gkAction=null,kickAction=null;
+const clock=new THREE.Clock();
+
+function initGame(){
+  document.getElementById('loading').style.display='none';
+
+  // Goalkeeper — de frente (rotation.y = 0)
+  gkModel=gltfs['gk_idle'].scene;
+  gkModel.scale.setScalar(0.01);
+  gkModel.position.set(0,0,-8);
+  gkModel.rotation.y=0;
+  gkModel.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
+  scene.add(gkModel);
+  gkMixer=new THREE.AnimationMixer(gkModel);
+  if(gltfs['gk_idle'].animations[0]) gkAnims['idle']=gkMixer.clipAction(gltfs['gk_idle'].animations[0]);
+  if(gltfs['gk_dive_left'].animations[0]) gkAnims['dive_left']=gkMixer.clipAction(gltfs['gk_dive_left'].animations[0]);
+  if(gltfs['gk_dive_right'].animations[0]) gkAnims['dive_right']=gkMixer.clipAction(gltfs['gk_dive_right'].animations[0]);
+  playGK('idle',true);
+
+  // Kicker — de costas para câmera (rotation.y = Math.PI = vira para a baliza)
+  kickModel=gltfs['penalty_kick'].scene;
+  kickModel.scale.setScalar(0.01);
+  kickModel.position.set(0,3.77,5);
+  kickModel.rotation.y=Math.PI;
+  kickModel.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
+  scene.add(kickModel);
+  kickMixer=new THREE.AnimationMixer(kickModel);
+  if(gltfs['penalty_kick'].animations[0]){
+    kickAnims['kick']=kickMixer.clipAction(gltfs['penalty_kick'].animations[0]);
+    // Mostrar batedor na pose de espera (meio da animação)
+    kickAnims['kick'].play();
+    kickAnims['kick'].paused=true;
+    kickAnims['kick'].time=0.5;
+    kickMixer.update(0);
+  }
+
+  // Bola com textura canvas (fiável e leve)
+  const ballCanvas=document.createElement('canvas');
+  ballCanvas.width=512;ballCanvas.height=512;
+  const bctx=ballCanvas.getContext('2d');
+  bctx.fillStyle='#ffffff';bctx.fillRect(0,0,512,512);
+  bctx.fillStyle='#111111';
+  // Pentagonos da bola
+  [[256,256],[128,128],[384,128],[128,384],[384,384],[256,60],[60,200],[452,200],[60,312],[452,312],[256,452]].forEach(([cx,cy])=>{
+    bctx.beginPath();
+    for(let i=0;i<5;i++){const a=i*Math.PI*2/5-Math.PI/2;const r=44;i===0?bctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):bctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));}
+    bctx.closePath();bctx.fill();
+  });
+  const ballTex=new THREE.CanvasTexture(ballCanvas);
+  ballModel=new THREE.Mesh(
+    new THREE.SphereGeometry(0.22,32,32),
+    new THREE.MeshStandardMaterial({map:ballTex,roughness:0.3,metalness:0.05})
+  );
+  ballModel.castShadow=true;ballModel.receiveShadow=true;
+  ballModel.position.set(0,0.22,2);
+  scene.add(ballModel);
+}
+
+function playGK(name,loop=false){
+  if(gkAction)gkAction.fadeOut(0.15);
+  const a=gkAnims[name];if(!a)return;
+  a.reset().fadeIn(0.15).play();
+  a.setLoop(loop?THREE.LoopRepeat:THREE.LoopOnce,loop?Infinity:1);
+  a.clampWhenFinished=!loop;gkAction=a;
+}
+
+function playKick(){
+  const a=kickAnims['kick'];if(!a)return;
+  a.paused=false;
+  a.reset().play();
+  a.setLoop(THREE.LoopOnce,1);
+  a.clampWhenFinished=true;
+  kickAction=a;
+}
+
+const targets={
+  top:{x:0,y:2.1,z:-7.5,gk:'dive_left'},
+  left:{x:-2.6,y:1.1,z:-7.5,gk:'dive_right'},
+  right:{x:2.6,y:1.1,z:-7.5,gk:'dive_left'},
+  low:{x:0,y:0.22,z:-7.5,gk:'dive_left'},
+};
+
+window.shoot=function(dir){
+  if(state==='shooting'||shots<=0||!ballModel)return;
+  state='shooting';shots--;
+  document.getElementById('sh').textContent=shots;
+  const t=targets[dir];
+  const saved=Math.random()<0.38;
+  const gkAnim=saved?t.gk:(Math.random()<0.5?'dive_left':'dive_right');
+
+  // Animação do batedor imediatamente
+  playKick();
+
+  const startPos=ballModel.position.clone();
+  const endPos=new THREE.Vector3(
+    saved?t.x*0.45:t.x,
+    saved?Math.max(t.y-0.5,0.22):t.y,
+    t.z
+  );
+
+  // Bola começa a mover 0.4s depois (durante o chute)
+  setTimeout(()=>{
+    playGK(gkAnim,false);
+    const dur=0.28;let el=0;
+    const ab=(dt)=>{
+      el+=dt;const p=Math.min(el/dur,1);
+      const e=p<0.5?2*p*p:-1+(4-2*p)*p;
+      ballModel.position.lerpVectors(startPos,endPos,e);
+      bsh.position.x=ballModel.position.x;
+      ballModel.rotation.x-=dt*30;
+      ballModel.rotation.z-=dt*10;
+      if(p<1)requestAnimationFrame(()=>ab(clock.getDelta()));
+      else{
+        if(saved){saves++;document.getElementById('sv').textContent=saves;showMsg('DEFENDIDO! 🧤','#ff4444');}
+        else{goals++;document.getElementById('sp').textContent=goals;showMsg('GOLOOO! ⚽🔥','#FFD700');}
+        setTimeout(()=>{
+          ballModel.position.set(0,0.22,2);
+          bsh.position.set(0,0.01,5.5);
+          playGK('idle',true);
+          if(shots<=0)endGame();else state='idle';
+        },2500);
+      }
+    };ab(0);
+  },400);
+};
+
+function showMsg(t,c){
+  const m=document.getElementById('msg');
+  m.textContent=t;m.style.color=c;m.style.opacity='1';
+  setTimeout(()=>m.style.opacity='0',2000);
+}
+
+function endGame(){
+  state='gameover';
+  document.getElementById('gameover').style.display='flex';
+  document.getElementById('got').textContent=goals>=3?'🏆 VITÓRIA!':'😔 FIM DO JOGO';
+  document.getElementById('fs').textContent='Golos: '+goals+' | Defesas: '+saves;
+}
+
+window.resetGame=function(){
+  goals=0;saves=0;shots=5;state='idle';
+  ['sp','sk','sv'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('sh').textContent='5';
+  document.getElementById('gameover').style.display='none';
+  if(ballModel)ballModel.position.set(0,0.22,2);
+  if(kickModel)kickModel.position.set(0,3.77,5);
+  bsh.position.set(0,0.01,5.5);
+  playGK('idle',true);
+};
+
+window.addEventListener('keydown',e=>{
+  const m={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'top',ArrowDown:'low'};
+  if(m[e.key])shoot(m[e.key]);
+});
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=clock.getDelta();
+  if(gkMixer)gkMixer.update(dt);
+  if(kickMixer)kickMixer.update(dt);
+  renderer.render(scene,camera);
+}
+animate();
+
+// Camera control panel
+const camInputs = {
+  cx:'x', cy:'y', cz:'z'
+};
+['cx','cy','cz','lx','ly','lz','fov'].forEach(id => {
+  const el = document.getElementById(id);
+  const val = document.getElementById(id+'-v');
+  if(!el) return;
+  el.addEventListener('input', () => {
+    val.textContent = el.value;
+    const cx = parseFloat(document.getElementById('cx').value);
+    const cy = parseFloat(document.getElementById('cy').value);
+    const cz = parseFloat(document.getElementById('cz').value);
+    const lx = parseFloat(document.getElementById('lx').value);
+    const ly = parseFloat(document.getElementById('ly').value);
+    const lz = parseFloat(document.getElementById('lz').value);
+    const fv = parseFloat(document.getElementById('fov').value);
+    camera.position.set(cx, cy, cz);
+    camera.lookAt(lx, ly, lz);
+    camera.fov = fv;
+    camera.updateProjectionMatrix();
+  });
+});
+</script>
+</body>
+</html>
